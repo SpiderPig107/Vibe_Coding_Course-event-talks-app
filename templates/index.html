@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <meta name="description" content="A modern web dashboard to fetch, view, filter, and share Google Cloud BigQuery release notes.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-database"></i>
+                    <div class="logo-spark"></div>
+                </div>
+                <div class="logo-text">
+                    <h1 id="app-title">BigQuery</h1>
+                    <p class="subtitle">Release Notes Hub</p>
+                </div>
+            </div>
+            
+            <div class="action-area">
+                <span id="last-updated-text" class="status-badge text-muted">Click refresh to load</span>
+                <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh release notes">
+                    <i class="fa-solid fa-rotate" id="refresh-icon"></i>
+                    <span>Refresh Feed</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Filter Controls -->
+        <section class="controls-card" aria-label="Filter and Search Controls">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="search-input" placeholder="Search updates (e.g. ML, Table, tags)..." aria-label="Search release notes">
+            </div>
+            <div class="filter-tabs" id="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All Updates</button>
+                <button class="filter-tab" data-filter="feature">
+                    <span class="dot dot-feature"></span> Features
+                </button>
+                <button class="filter-tab" data-filter="announcement">
+                    <span class="dot dot-announcement"></span> Announcements
+                </button>
+                <button class="filter-tab" data-filter="security">
+                    <span class="dot dot-security"></span> Security
+                </button>
+                <button class="filter-tab" data-filter="change">
+                    <span class="dot dot-change"></span> Changes & Issues
+                </button>
+            </div>
+        </section>
+
+        <!-- Main Feed / Content -->
+        <div class="feed-wrapper">
+            <!-- Loading Indicator -->
+            <div id="loading-state" class="loading-container hidden">
+                <div class="spinner-loader"></div>
+                <p>Fetching BigQuery release notes...</p>
+                
+                <div class="skeleton-feed">
+                    <div class="skeleton-date"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="error-container hidden">
+                <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                <h2>Oops! Something went wrong.</h2>
+                <p id="error-message">Unable to fetch release notes at this time. Please check your connection and try again.</p>
+                <button id="retry-btn" class="btn btn-secondary">Retry Now</button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-container hidden">
+                <i class="fa-solid fa-folder-open empty-icon"></i>
+                <h2>No updates found</h2>
+                <p>Try searching for a different keyword or adjusting your filters.</p>
+            </div>
+
+            <!-- Notes Container -->
+            <div id="notes-container" class="notes-feed">
+                <!-- Dynamically Populated -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Tweet Composer Slide Drawer -->
+    <div id="tweet-drawer" class="tweet-drawer" aria-hidden="true">
+        <div class="drawer-overlay" id="drawer-overlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h3><i class="fa-brands fa-x-twitter"></i> Tweet Composer</h3>
+                <button id="close-drawer-btn" class="close-btn" aria-label="Close composer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="drawer-body">
+                <p class="drawer-instruction">Edit your update summary below to share on X (Twitter):</p>
+                
+                <div class="composer-area">
+                    <textarea id="tweet-text" rows="5" placeholder="What's happening in BigQuery?"></textarea>
+                    <div class="composer-meta">
+                        <span id="char-counter" class="char-counter">0 / 280</span>
+                    </div>
+                </div>
+
+                <div class="tweet-preview-box">
+                    <div class="tweet-preview-header">
+                        <div class="avatar-placeholder">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="tweet-user-info">
+                            <span class="user-name">You</span>
+                            <span class="user-handle">@yourhandle</span>
+                        </div>
+                    </div>
+                    <div class="tweet-preview-text" id="tweet-preview-text">
+                        <!-- Live preview of the text -->
+                    </div>
+                    <div class="tweet-preview-footer">
+                        <span><i class="fa-regular fa-comment"></i> 0</span>
+                        <span><i class="fa-regular fa-retweet"></i> 0</span>
+                        <span><i class="fa-regular fa-heart"></i> 0</span>
+                        <span><i class="fa-regular fa-bookmark"></i></span>
+                    </div>
+                </div>
+
+                <button id="send-tweet-btn" class="btn btn-tweet">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <span>Post Tweet</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden">
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <footer class="app-footer">
+        <p>BigQuery Release Notes Hub &copy; 2026. Built with Python Flask &amp; Vanilla web tech.</p>
+    </footer>
+
+    <!-- Custom Script -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
