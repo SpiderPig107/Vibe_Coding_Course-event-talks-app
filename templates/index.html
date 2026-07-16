@@ -52,6 +52,12 @@
         </div>
     </header>
 
+    <!-- Offline Cache Warning Banner -->
+    <div id="offline-banner" class="offline-banner hidden">
+        <i class="fa-solid fa-cloud-slash"></i>
+        <span>Viewing cached release notes. Unable to connect to the live feed.</span>
+    </div>
+
     <main class="container">
         <!-- Filter Controls -->
         <section class="controls-card" aria-label="Filter and Search Controls">
@@ -103,6 +109,9 @@
                 <i class="fa-solid fa-folder-open empty-icon"></i>
                 <h2>No updates found</h2>
                 <p>Try searching for a different keyword or adjusting your filters.</p>
+                <button id="clear-search-btn" class="btn btn-secondary" style="margin-top: 8px;">
+                    <i class="fa-solid fa-xmark"></i> Clear Filters &amp; Search
+                </button>
             </div>
 
             <!-- Notes Container -->

@@ -27,6 +27,8 @@ const charCounter = document.getElementById('char-counter');
 const tweetPreviewText = document.getElementById('tweet-preview-text');
 const sendTweetBtn = document.getElementById('send-tweet-btn');
 const themeCheckbox = document.getElementById('theme-checkbox');
+const clearSearchBtn = document.getElementById('clear-search-btn');
+const offlineBanner = document.getElementById('offline-banner');
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', init);
@@ -59,6 +61,26 @@ function init() {
             document.documentElement.setAttribute('data-theme', 'dark');
             localStorage.setItem('theme', 'dark');
         }
+    });
+
+    // Esc Key listener to close Drawer
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && tweetDrawer.classList.contains('open')) {
+            closeDrawer();
+        }
+    });
+
+    // Clear Search button click logic
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        activeFilter = 'all';
+        
+        // Reset filter tabs UI
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.filter-tab[data-filter="all"]').classList.add('active');
+        
+        renderFeed();
     });
     
     searchInput.addEventListener('input', (e) => {
@@ -100,10 +122,20 @@ async function fetchNotes() {
         if (result.success) {
             allNotes = result.data;
             exportCsvBtn.disabled = false;
-            const now = new Date();
-            lastUpdatedText.textContent = `Updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            
+            // Show/Hide offline warning banner
+            if (result.cached) {
+                offlineBanner.classList.remove('hidden');
+                lastUpdatedText.textContent = `Viewing Cache`;
+            } else {
+                offlineBanner.classList.add('hidden');
+                const now = new Date();
+                lastUpdatedText.textContent = `Updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            }
+            
             renderFeed();
         } else {
+            offlineBanner.classList.add('hidden');
             showError(result.message || 'Failed to retrieve release notes.');
         }
     } catch (err) {
@@ -315,6 +347,7 @@ function showLoading() {
     refreshIcon.classList.add('spinning');
     refreshBtn.disabled = true;
     exportCsvBtn.disabled = true;
+    offlineBanner.classList.add('hidden');
 }
 
 function showError(msg) {
@@ -324,6 +357,7 @@ function showError(msg) {
     refreshIcon.classList.remove('spinning');
     refreshBtn.disabled = false;
     exportCsvBtn.disabled = true;
+    offlineBanner.classList.add('hidden');
 }
 
 function showEmpty() {
