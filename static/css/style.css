@@ -491,6 +491,34 @@ body {
     gap: 12px;
 }
 
+.card-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+}
+
+.card-action-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text-secondary);
+}
+
+.card-action-btn.copied {
+    color: var(--color-feature);
+    border-color: var(--color-feature);
+    background: var(--color-feature-bg);
+}
+
 .select-checkbox {
     width: 20px;
     height: 20px;

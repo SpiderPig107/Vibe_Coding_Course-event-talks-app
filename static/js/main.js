@@ -16,6 +16,7 @@ const emptyState = document.getElementById('empty-state');
 const notesContainer = document.getElementById('notes-container');
 const lastUpdatedText = document.getElementById('last-updated-text');
 const retryBtn = document.getElementById('retry-btn');
+const exportCsvBtn = document.getElementById('export-csv-btn');
 
 // Drawer DOM Elements
 const tweetDrawer = document.getElementById('tweet-drawer');
@@ -36,6 +37,7 @@ function init() {
     // Event registrations
     refreshBtn.addEventListener('click', fetchNotes);
     retryBtn.addEventListener('click', fetchNotes);
+    exportCsvBtn.addEventListener('click', exportToCSV);
     
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase();
@@ -75,6 +77,7 @@ async function fetchNotes() {
         
         if (result.success) {
             allNotes = result.data;
+            exportCsvBtn.disabled = false;
             const now = new Date();
             lastUpdatedText.textContent = `Updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
             renderFeed();
@@ -152,6 +155,9 @@ function renderFeed() {
                     <div class="card-header">
                         <span class="badge ${badgeClass}">${update.category}</span>
                         <div class="card-actions">
+                            <button class="card-action-btn copy-btn" title="Copy to Clipboard">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
                             <span class="select-checkbox" aria-label="Select update to Tweet">
                                 <i class="fa-solid fa-check"></i>
                             </span>
@@ -162,6 +168,13 @@ function renderFeed() {
                     </div>
                 `;
                 
+                // Copy to Clipboard logic
+                const copyBtn = card.querySelector('.copy-btn');
+                copyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent card selection click event
+                    copyToClipboard(update.plain_text, copyBtn);
+                });
+
                 // Clicking Card selects it and opens composer
                 card.addEventListener('click', (e) => {
                     // Prevent trigger if clicking on an actual link in body
@@ -279,6 +292,7 @@ function showLoading() {
     loadingState.classList.remove('hidden');
     refreshIcon.classList.add('spinning');
     refreshBtn.disabled = true;
+    exportCsvBtn.disabled = true;
 }
 
 function showError(msg) {
@@ -287,6 +301,7 @@ function showError(msg) {
     errorMessage.textContent = msg;
     refreshIcon.classList.remove('spinning');
     refreshBtn.disabled = false;
+    exportCsvBtn.disabled = true;
 }
 
 function showEmpty() {
@@ -294,6 +309,7 @@ function showEmpty() {
     emptyState.classList.remove('hidden');
     refreshIcon.classList.remove('spinning');
     refreshBtn.disabled = false;
+    exportCsvBtn.disabled = true;
 }
 
 function hideAllStates() {
@@ -313,4 +329,99 @@ function showToast(msg) {
     setTimeout(() => {
         toast.classList.add('hidden');
     }, 4000);
+}
+
+// Copy to Clipboard logic
+async function copyToClipboard(text, btnElement) {
+    try {
+        await navigator.clipboard.writeText(text);
+        
+        btnElement.classList.add('copied');
+        const icon = btnElement.querySelector('i');
+        icon.className = 'fa-solid fa-check';
+        
+        showToast('Copied update to clipboard!');
+        
+        setTimeout(() => {
+            btnElement.classList.remove('copied');
+            icon.className = 'fa-regular fa-copy';
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        showToast('Failed to copy to clipboard.');
+    }
+}
+
+// Export Filtered/Searched Notes to CSV
+function exportToCSV() {
+    if (!allNotes || allNotes.length === 0) {
+        showToast('No notes available to export.');
+        return;
+    }
+    
+    const csvRows = [];
+    csvRows.push(['Date', 'Category', 'Update Content', 'Link'].map(escapeCSVField).join(','));
+    
+    let noteCount = 0;
+    
+    allNotes.forEach(entry => {
+        entry.updates.forEach(update => {
+            let matchesCategory = false;
+            const categoryLower = update.category.toLowerCase();
+            
+            if (activeFilter === 'all') {
+                matchesCategory = true;
+            } else if (activeFilter === 'change') {
+                matchesCategory = categoryLower.includes('change') || categoryLower.includes('issue');
+            } else {
+                matchesCategory = categoryLower.includes(activeFilter);
+            }
+            
+            const matchesSearch = searchQuery === '' || 
+                update.plain_text.toLowerCase().includes(searchQuery) ||
+                update.category.toLowerCase().includes(searchQuery);
+                
+            if (matchesCategory && matchesSearch) {
+                const row = [
+                    entry.date,
+                    update.category,
+                    update.plain_text,
+                    entry.link
+                ];
+                csvRows.push(row.map(escapeCSVField).join(','));
+                noteCount++;
+            }
+        });
+    });
+    
+    if (noteCount === 0) {
+        showToast('No matching notes to export.');
+        return;
+    }
+    
+    const csvContent = "\uFEFF" + csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${activeFilter}_filter.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`Successfully exported ${noteCount} notes to CSV!`);
+}
+
+function escapeCSVField(field) {
+    if (field === null || field === undefined) {
+        return '';
+    }
+    let stringField = String(field);
+    stringField = stringField.replace(/"/g, '""');
+    if (stringField.includes(',') || stringField.includes('\n') || stringField.includes('\r') || stringField.includes('"')) {
+        stringField = `"${stringField}"`;
+    }
+    return stringField;
 }
