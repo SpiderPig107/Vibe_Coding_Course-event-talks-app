@@ -34,6 +34,12 @@
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
     --shadow-glow: 0 0 20px rgba(66, 133, 244, 0.25);
+    
+    /* Glow and Background Variables */
+    --bg-glow-1: rgba(66, 133, 244, 0.12);
+    --bg-glow-2: rgba(52, 168, 83, 0.08);
+    --bg-glow-3: rgba(234, 67, 53, 0.05);
+    --header-bg: rgba(11, 15, 25, 0.75);
 }
 
 /* General Reset & Layout */
@@ -63,10 +69,10 @@ body {
     height: 100%;
     z-index: -1;
     background: 
-        radial-gradient(circle at 10% 20%, rgba(66, 133, 244, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(52, 168, 83, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 50% 50%, rgba(234, 67, 53, 0.05) 0%, transparent 50%),
-        #0b0f19;
+        radial-gradient(circle at 10% 20%, var(--bg-glow-1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, var(--bg-glow-2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, var(--bg-glow-3) 0%, transparent 50%),
+        var(--bg-color);
 }
 
 /* Container */
@@ -80,7 +86,7 @@ body {
 
 /* App Header */
 .app-header {
-    background: rgba(11, 15, 25, 0.75);
+    background: var(--header-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--card-border);
@@ -819,3 +825,166 @@ body {
         max-height: 100%;
     }
 }
+
+/* Light Theme Variables and Overrides */
+[data-theme="light"] {
+    --bg-color: #f3f4f6;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(0, 0, 0, 0.08);
+    --card-hover-border: rgba(66, 133, 244, 0.6);
+    
+    /* Brand Colors */
+    --primary: #1a73e8;
+    --primary-hover: #1557b0;
+    --primary-glow: rgba(26, 115, 232, 0.15);
+    
+    /* Text Colors */
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-muted: #8c96a3;
+    
+    /* Glow Overrides for Light Mode */
+    --bg-glow-1: rgba(66, 133, 244, 0.06);
+    --bg-glow-2: rgba(52, 168, 83, 0.04);
+    --bg-glow-3: rgba(234, 67, 53, 0.03);
+    --header-bg: rgba(243, 244, 246, 0.75);
+}
+
+/* Light Theme Specific Element Overrides */
+[data-theme="light"] .logo-text h1 {
+    background: linear-gradient(to right, #111827, #374151);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .search-box input {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .search-box input:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+}
+
+[data-theme="light"] .filter-tab {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .filter-tab:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .filter-tab.active {
+    background: rgba(26, 115, 232, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+[data-theme="light"] .btn-secondary {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .date-title {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .card-body code {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1f2937;
+}
+
+[data-theme="light"] .drawer-content {
+    background: #ffffff;
+}
+
+[data-theme="light"] .composer-area {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .avatar-placeholder {
+    background: #f3f4f6;
+}
+
+/* Theme Switch Toggle Switch UI */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 50px;
+    border: 1px solid var(--card-border);
+}
+
+[data-theme="light"] .theme-switch-wrapper {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.theme-icon {
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+[data-theme="light"] .fa-sun {
+    color: #fbbc05;
+}
+
+[data-theme="dark"] .fa-moon {
+    color: #818cf8;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 18px;
+    position: relative;
+    width: 34px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: #4b5563;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 2px;
+    content: "";
+    height: 14px;
+    left: 2px;
+    position: absolute;
+    transition: .4s;
+    width: 14px;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+

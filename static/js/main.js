@@ -26,11 +26,22 @@ const tweetTextarea = document.getElementById('tweet-text');
 const charCounter = document.getElementById('char-counter');
 const tweetPreviewText = document.getElementById('tweet-preview-text');
 const sendTweetBtn = document.getElementById('send-tweet-btn');
+const themeCheckbox = document.getElementById('theme-checkbox');
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+    // Initialize Theme
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (currentTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeCheckbox.checked = true;
+    } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeCheckbox.checked = false;
+    }
+
     // Fetch data on load
     fetchNotes();
 
@@ -38,6 +49,17 @@ function init() {
     refreshBtn.addEventListener('click', fetchNotes);
     retryBtn.addEventListener('click', fetchNotes);
     exportCsvBtn.addEventListener('click', exportToCSV);
+    
+    // Theme Toggle Event Listener
+    themeCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    });
     
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase();
